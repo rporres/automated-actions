@@ -36,6 +36,10 @@ class Settings(BaseSettings):
     # AuthZ
     opa_host: str = "http://opa:8181"
 
+    result_backend_url: str = (
+        "dynamodb://localstack:localstack@localhost:4566/celery_results"
+    )
+
     # worker metrics config
     worker_metrics_port: int = 8000
 
