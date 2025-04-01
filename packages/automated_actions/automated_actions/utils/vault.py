@@ -4,7 +4,6 @@ from pathlib import Path
 
 import hvac
 from hvac.api.auth_methods import Kubernetes
-from sretoolbox.utils import retry
 
 
 class SecretNotFoundError(Exception):
@@ -27,7 +26,7 @@ class SecretFieldNotFoundError(Exception):
     pass
 
 
-class VaultClientBadArgsError(Exception):
+class VaultClientMissingArgsError(Exception):
     pass
 
 
@@ -64,49 +63,23 @@ class VaultClient:
                 role=kube_auth_role, jwt=jwt, mount_point=kube_auth_mount
             )
         else:
-            raise VaultClientBadArgsError
+            raise VaultClientMissingArgsError
 
-    @retry()
-    def read(self, secret: Mapping) -> str:
-        """Returns a value of a key in a Vault secret.
-
-        The input secret is a dictionary which contains the following fields:
-        * path - path to the secret in Vault
-        * field - the key to read from the secret
-        * version (optional) - secret version to read (if this is a v2 KV engine)
-        """
-        secret_path = secret["path"]
-        secret_field = secret["field"]
-        secret_version = secret.get("version")
-
+    def read_secret(self, path: str, version: str | None = None) -> str:
+        """Returns a value of a key in a Vault secret."""
         kv_version = self._get_mount_version_by_secret_path(secret_path)
 
         data = None
         if kv_version == VERSION_2:
-            data = self._read_v2(secret_path, secret_field, secret_version)
+            data = self._read_all_v2(secret_path, secret_version)
         else:
-            data = self._read_v1(secret_path, secret_field)
+            data = self._read_all_v1(secret_path)
 
         if data is None:
             raise SecretNotFoundError
 
         return data
 
-    def _read_v2(self, path: str, field: str, version: str) -> str:
-        data, _ = self._read_all_v2(path, version)
-        try:
-            secret_field = data[field]
-        except KeyError:
-            raise SecretFieldNotFoundError(f"{path}/{field} ({version})") from None
-        return secret_field
-
-    def _read_v1(self, path: str, field: str) -> str:
-        data = self._read_all_v1(path)
-        try:
-            secret_field = data[field]
-        except KeyError:
-            raise SecretFieldNotFoundError(f"{path}/{field}") from None
-        return secret_field
 
     def _read_all_v2(self, path: str, version: str | None) -> tuple[dict, str | None]:
         path_split = path.split("/")

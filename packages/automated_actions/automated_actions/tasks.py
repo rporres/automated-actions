@@ -1,14 +1,13 @@
 import logging
 
 from celery import Celery
-from celery.app.task import Task
+from celery.app.task import Task as CeleryTask
 
-from .config import settings
-from .utils.openshift_client import OpenshiftClient, RollingRestartResource
+from automated_actions.config import settings
+from automated_actions.utils.openshift_client import OpenshiftClient, RollingRestartResource
+from automated_actions.api.models import Task
 
-SERVER_URL = "https://api.appint-ex-01.e7t8.p1.openshiftapps.com:6443"
-TOKEN = "LOL"
-LOG = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 app = Celery(
     "tasks",
@@ -37,13 +36,12 @@ app = Celery(
 
 
 @app.task(bind=True)
-def restart_openshift_resource(
-    self: Task, namespace: str, kind: str, name: str, oc: OpenshiftClient | None = None
+def openshift_workload_restart(
+    self: CeleryTask, cluster: str, namespace: str, kind: str, name: str, task: Task
 ) -> bool:
-    LOG.info(self.request.id)
+    log.info(self.request.id)
 
-    if not oc:
-        oc = OpenshiftClient(server_url=SERVER_URL, token=TOKEN)
+    oc = OpenshiftClient(server_url=SERVER_URL, token=TOKEN)
 
     if kind in RollingRestartResource:
         res = oc.rolling_restart(

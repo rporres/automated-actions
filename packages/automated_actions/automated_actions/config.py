@@ -43,5 +43,11 @@ class Settings(BaseSettings):
     # worker metrics config
     worker_metrics_port: int = 8000
 
+    # qontract-server
+    qontract_server_url: str = "http://localhost:4000/graphql"
+    qontract_server_token: str = ""  # noqa: S105
+
+    # vault
+
 
 settings = Settings()
