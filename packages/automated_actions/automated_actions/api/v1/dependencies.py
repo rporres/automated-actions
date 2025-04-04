@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends, Request
 
-from automated_actions.api.models import Task, TaskSchemaIn, User
+from automated_actions.api.models import Action, ActionSchemaIn, User
 from automated_actions.auth import OPA
 
 
@@ -20,9 +20,9 @@ async def get_authz(request: Request, user: UserDep) -> OPA:
 AuthZDep = Annotated[OPA, Depends(get_authz)]
 
 
-class TaskLog:
+class ActionLog:
     def __init__(self, name: str) -> None:
         self.name = name
 
-    def __call__(self, user: UserDep) -> Task:
-        return Task.create(TaskSchemaIn(name=self.name, owner=user.email))
+    def __call__(self, user: UserDep) -> Action:
+        return Action.create(ActionSchemaIn(name=self.name, owner=user.email))

@@ -1,17 +1,17 @@
-from gql import gql, Client
-from gql.transport.requests import RequestsHTTPTransport
+from typing import Any
 
-from automated_actions.gql_definitions.tasks.clusters import query as clusters_query
+from gql import Client, gql
+from gql.transport.requests import RequestsHTTPTransport
 
 
 class GQLClient:
-    def __init__(self, url: str, retries: int = 3, token: str = "") -> None:
+    def __init__(self, url: str, retries: int = 3, token: str | None = None) -> None:
         req_headers = None
         if token:
             req_headers = {"Authorization": token}
 
-        transport = RequestsHTTPTransport(url=url, retries=retries)
-        self.client = Client(transport=transport, headers=req_headers)
+        transport = RequestsHTTPTransport(url=url, retries=retries, headers=req_headers)
+        self.client = Client(transport=transport)
 
     def query(self, query: str, variables: dict | None = None) -> dict[str, Any] | None:
         result = self.client.execute(
@@ -21,8 +21,4 @@ class GQLClient:
         if "data" in result:
             return result["data"]
 
-    def get_cluster_connection_data(cluster_name: str) -> ClusterConnectionData:
-         cluster = clusters_query(
-            self.query, variables={"filter": {"name": cluster_name}}
-         )
-
+        return None

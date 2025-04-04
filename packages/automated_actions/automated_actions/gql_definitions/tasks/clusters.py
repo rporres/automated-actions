@@ -11,7 +11,7 @@ from typing import (  # noqa: F401 # pylint: disable=W0611
     Union,
 )
 
-from packages.automated_actions.automated_actions.gql_definitions.fragments.vault_secret import (
+from automated_actions.gql_definitions.fragments.vault_secret import (
     VaultSecret,
 )
 from pydantic import (  # noqa: F401 # pylint: disable=W0611

@@ -1,18 +1,15 @@
 from datetime import UTC, datetime
 from enum import StrEnum
 
-from kubernetes.client import (  # type: ignore[attr-defined]
+from kubernetes.client import (
     ApiClient,
     Configuration,
 )
 from kubernetes.dynamic.exceptions import (
-    ForbiddenError,
     NotFoundError,
-    ServerTimeoutError,
 )
 from kubernetes.dynamic.resource import ResourceInstance
 from openshift.dynamic import DynamicClient
-from sretoolbox.utils import retry
 
 SUPPORTED_POD_OWNERS = {"ReplicaSet", "StatefulSet"}
 
@@ -32,7 +29,6 @@ class RollingRestartResource(StrEnum):
 
 
 class OpenshiftClient:
-
     def __init__(self, server_url: str, token: str, retries: int = 5) -> None:
         configuration = Configuration(
             host=server_url, api_key={"authorization": f"Bearer {token}"}
@@ -41,7 +37,6 @@ class OpenshiftClient:
         self.dyn_client = DynamicClient(ApiClient(configuration=configuration))
 
     # https://kubernetes.io/docs/reference/labels-annotations-taints/#kubectl-k8s-io-restart-at
-    @retry(max_attempts=5, exceptions=(ServerTimeoutError, ForbiddenError))
     def rolling_restart(
         self, kind: RollingRestartResource, name: str, namespace: str
     ) -> ResourceInstance:
@@ -70,7 +65,9 @@ class OpenshiftClient:
 
         return res
 
-    def delete_pod_from_replicated_resource(self, name: str, namespace: str) -> ResourceInstance:
+    def delete_pod_from_replicated_resource(
+        self, name: str, namespace: str
+    ) -> ResourceInstance:
         api = self.dyn_client.resources.get(api_version="v1", kind="Pod")
 
         try:
@@ -90,7 +87,7 @@ class OpenshiftClient:
         if not has_pod_proper_owner:
             raise OpenshiftClientPodDeletionNotSupportedError(
                 f"Pod '{name}' in namespace '{namespace}' cannot be deleted as "
-                f"it does not belong to a {", ".join(SUPPORTED_POD_OWNERS)}."
+                f"it does not belong to a {', '.join(SUPPORTED_POD_OWNERS)}."
             )
 
         return api.delete(name=name, namespace=namespace)

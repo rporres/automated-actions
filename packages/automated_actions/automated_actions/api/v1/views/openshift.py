@@ -4,11 +4,11 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Path
 
 from automated_actions.api.models import (
-    Task,
-    TaskSchemaOut,
-    TaskStatus,
+    Action,
+    ActionSchemaOut,
+    ActionStatus,
 )
-from automated_actions.api.v1.dependencies import TaskLog
+from automated_actions.api.v1.dependencies import ActionLog
 
 router = APIRouter()
 log = logging.getLogger(__name__)
@@ -30,9 +30,9 @@ def openshift_workload_restart(
         ),
     ],
     name: Annotated[str, Path(description="OpenShift workload name")],
-    task: Annotated[Task, Depends(TaskLog("openshift-workload-restart"))],
-) -> TaskSchemaOut:
+    action: Annotated[Action, Depends(ActionLog("openshift-workload-restart"))],
+) -> ActionSchemaOut:
     """Restart an OpenShift workload."""
     log.info(f"Restarting {kind}/{name} in {cluster}/{namespace}")
-    task.set_status(TaskStatus.RUNNING)
-    return task.dump()
+    action.set_status(ActionStatus.RUNNING)
+    return action.dump()
