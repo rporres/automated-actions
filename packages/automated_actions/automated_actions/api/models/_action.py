@@ -48,11 +48,11 @@ class Action(Table[ActionSchemaIn, ActionSchemaOut]):
         table_name = "aa-action"
         schema_out = ActionSchemaOut
 
-    @staticmethod
-    def _pre_create(values: dict[str, Any]) -> dict[str, Any]:
-        values = super(Action, Action)._pre_create(values)
-        values["action_id"] = str(uuid.uuid4())
-        return values
+#    @staticmethod
+#    def _pre_create(values: dict[str, Any]) -> dict[str, Any]:
+#        values = super(Action, Action)._pre_create(values)
+#        values["action_id"] = str(uuid.uuid4())
+#        return values
 
     def set_status(self, status: ActionStatus) -> None:
         self.update(actions=[Action.status.set(status.value)])

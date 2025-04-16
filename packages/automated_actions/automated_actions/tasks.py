@@ -60,7 +60,7 @@ class AutomatedActionTask(Task):
         args: tuple,  # noqa: ARG002
         kwargs: dict,
     ) -> None:
-        log.warning(
+        log.debug(
             "action_id=%s set to %s", kwargs["task"].action_id, ActionStatus.RUNNING
         )
         kwargs["action"].set_status(ActionStatus.RUNNING)
@@ -72,7 +72,7 @@ class AutomatedActionTask(Task):
         args: tuple,  # noqa: ARG002
         kwargs: dict,
     ) -> None:
-        log.warning(
+        log.debug(
             "action_id=%s set to %s", kwargs["task"].action_id, ActionStatus.SUCCESS
         )
         kwargs["action"].set_status(ActionStatus.SUCCESS)
@@ -89,7 +89,7 @@ class AutomatedActionTask(Task):
         kwargs: dict,
         einfo: ExceptionInfo,
     ) -> None:
-        log.warning(
+        log.debug(
             "action_id=%s set to %s", kwargs["task"].action_id, ActionStatus.FAILURE
         )
         kwargs["action"].set_status(ActionStatus.FAILURE)
@@ -106,7 +106,7 @@ class AutomatedActionTask(Task):
         kwargs: dict,
         einfo: ExceptionInfo,
     ) -> None:
-        log.warning(
+        log.debug(
             "action_id=%s retrying due to %s", kwargs["action"].action_id, einfo
         )
 

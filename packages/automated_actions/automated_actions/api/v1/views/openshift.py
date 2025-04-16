@@ -34,5 +34,7 @@ def openshift_workload_restart(
 ) -> ActionSchemaOut:
     """Restart an OpenShift workload."""
     log.info(f"Restarting {kind}/{name} in {cluster}/{namespace}")
-    action.set_status(ActionStatus.RUNNING)
+    # action.set_status(ActionStatus.RUNNING)
+    # enqueue and set action_id
+
     return action.dump()
